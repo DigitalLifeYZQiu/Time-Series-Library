@@ -746,3 +746,100 @@ class UEAloader(Dataset):
 
     def __len__(self):
         return len(self.all_IDs)
+
+
+class UCRAnomalyloader(Dataset):
+    def __init__(self, args, root_path, win_size, flag="train", patch_len=96):
+        self.args = args
+        self.root_path = args.root_path
+        self.data_path = args.data_path
+        self.seq_len = win_size
+        self.patch_len = patch_len
+        self.flag = flag
+        if self.flag == "train":
+            self.stride = 1
+        else:
+            self.stride = self.seq_len
+        
+        self.dataset_file_path = os.path.join(self.root_path, self.data_path)
+        data_list = []
+        assert self.dataset_file_path.endswith('.txt')
+        try:
+            with open(self.dataset_file_path, "r", encoding='utf-8') as f:
+                for line in f.readlines():
+                    line = line.strip('\n').split(',')
+                    data_line = np.stack([float(i) for i in line])
+                    data_list.append(data_line)
+            self.data = np.stack(data_list, 0)
+        except ValueError:
+            with open(self.dataset_file_path, "r", encoding='utf-8') as f:
+                for line in f.readlines():
+                    line = line.strip('\n').split(',')
+                    data_line = np.stack([float(i) for i in line[0].split()])
+            self.data = data_line
+            
+            self.data = np.expand_dims(self.data, axis=1)
+        
+        self.border = self.find_border_number(self.data_path)
+        self.scaler = StandardScaler()
+        self.scaler.fit(self.data[:self.border])
+        self.data = self.scaler.transform(self.data)
+        if self.flag == "train":
+            self.data = self.data[:self.border]
+        elif self.flag == "val":
+            self.data = self.data[(int)(self.border*0.8):self.border]
+        else:
+            self.data = self.data[self.border - self.patch_len:]
+        
+        border_start = self.find_border_number(self.data_path)
+        border1, border2 = self.find_border(self.data_path)
+        if self.flag == "test":
+            self.test_label = np.zeros(self.data.shape[0])
+            self.test_label[border1 - border_start:border2 - border_start] = 1
+        else:
+            self.test_label = np.zeros(self.data.shape[0])
+    
+    def find_border_number(self, input_string):
+        parts = input_string.split('_')
+        
+        if len(parts) < 3:
+            return None
+        
+        border_str = parts[-3]
+        
+        try:
+            border = int(border_str)
+            return border
+        except ValueError:
+            return None
+    
+    def find_border(self, input_string):
+        parts = input_string.split('_')
+        
+        if len(parts) < 3:
+            return None
+        
+        border1_str = parts[-2]
+        border2_str = parts[-1]
+        if '.' in border2_str:
+            border2_str = border2_str[:border2_str.find('.')]
+        
+        try:
+            border1 = int(border1_str)
+            border2 = int(border2_str)
+            return border1, border2
+        except ValueError:
+            return None
+    
+    def getData(self):
+        return self.data
+    
+    def __len__(self):
+        return (self.data.shape[0] - self.seq_len) // self.stride + 1
+    
+    def __getitem__(self, index):
+        index = index * self.stride
+        if self.flag == "test":
+            return self.data[index:index + self.seq_len, :], self.test_label[index:index + self.seq_len]
+        else:
+            return self.data[index:index + self.seq_len, :], self.test_label[index:index + self.seq_len]

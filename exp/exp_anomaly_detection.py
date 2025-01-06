@@ -181,18 +181,29 @@ class Exp_Anomaly_Detection(Exp_Basic):
 
         print("pred:   ", pred.shape)
         print("gt:     ", gt.shape)
+        
+        pred = np.array(pred)
+        gt = np.array(gt)
+        print("pred: ", pred.shape)
+        print("gt:   ", gt.shape)
+        
+        accuracy = accuracy_score(gt, pred)
+        precision, recall, f_score, support = precision_recall_fscore_support(gt, pred, average='binary')
+        print("Accuracy : {:0.4f}, Precision : {:0.4f}, Recall : {:0.4f}, F-score : {:0.4f} ".format(
+            accuracy, precision,
+            recall, f_score))
 
         # (4) detection adjustment
         gt, pred = adjustment(gt, pred)
 
         pred = np.array(pred)
         gt = np.array(gt)
-        print("pred: ", pred.shape)
-        print("gt:   ", gt.shape)
+        # print("pred: ", pred.shape)
+        # print("gt:   ", gt.shape)
 
         accuracy = accuracy_score(gt, pred)
         precision, recall, f_score, support = precision_recall_fscore_support(gt, pred, average='binary')
-        print("Accuracy : {:0.4f}, Precision : {:0.4f}, Recall : {:0.4f}, F-score : {:0.4f} ".format(
+        print("AdjAccuracy : {:0.4f}, AdjPrecision : {:0.4f}, AdjRecall : {:0.4f}, AdjF-score : {:0.4f} ".format(
             accuracy, precision,
             recall, f_score))
 
