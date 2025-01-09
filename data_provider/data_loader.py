@@ -749,7 +749,7 @@ class UEAloader(Dataset):
 
 
 class UCRAnomalyloader(Dataset):
-    def __init__(self, args, root_path, win_size, flag="train", patch_len=96):
+    def __init__(self, args, root_path,  win_size, flag="train", patch_len=96):
         self.args = args
         self.root_path = args.root_path
         self.data_path = args.data_path
@@ -787,9 +787,9 @@ class UCRAnomalyloader(Dataset):
         if self.flag == "train":
             self.data = self.data[:self.border]
         elif self.flag == "val":
-            self.data = self.data[(int)(self.border*0.8):self.border]
+            self.data = self.data[(int)(self.border*0.5):self.border]
         else:
-            self.data = self.data[self.border - self.patch_len:]
+            self.data = self.data[self.border:]
         
         border_start = self.find_border_number(self.data_path)
         border1, border2 = self.find_border(self.data_path)

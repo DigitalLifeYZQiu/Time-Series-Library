@@ -6,10 +6,12 @@ from exp.exp_long_term_forecasting import Exp_Long_Term_Forecast
 from exp.exp_imputation import Exp_Imputation
 from exp.exp_short_term_forecasting import Exp_Short_Term_Forecast
 from exp.exp_anomaly_detection import Exp_Anomaly_Detection
+from exp.exp_anomaly_detection_LTM import Exp_Anomaly_Detection_LTM
 from exp.exp_classification import Exp_Classification
 from utils.print_args import print_args
 import random
 import numpy as np
+from datetime import datetime
 
 if __name__ == '__main__':
     fix_seed = 2021
@@ -84,6 +86,7 @@ if __name__ == '__main__':
                         help='down sampling method, only support avg, max, conv')
     parser.add_argument('--seg_len', type=int, default=48,
                         help='the length of segmen-wise iteration of SegRNN')
+    parser.add_argument('--ckpt_path', type=str, default='', help='ckpt file')
 
     # optimization
     parser.add_argument('--num_workers', type=int, default=10, help='data loader num workers')
@@ -139,6 +142,9 @@ if __name__ == '__main__':
 
     # TimeXer
     parser.add_argument('--patch_len', type=int, default=16, help='patch length')
+    
+    # Visualization
+    parser.add_argument('--date_record', action='store_true', help='record date in visualization', default=False)
 
     args = parser.parse_args()
     if torch.cuda.is_available() and args.use_gpu:
@@ -168,6 +174,8 @@ if __name__ == '__main__':
         Exp = Exp_Imputation
     elif args.task_name == 'anomaly_detection':
         Exp = Exp_Anomaly_Detection
+    elif args.task_name == 'anomaly_detection_ltm':
+        Exp = Exp_Anomaly_Detection_LTM
     elif args.task_name == 'classification':
         Exp = Exp_Classification
     else:
@@ -197,6 +205,10 @@ if __name__ == '__main__':
                 args.embed,
                 args.distil,
                 args.des, ii)
+            
+            if args.date_record:
+                # setting += datetime.now().strftime("%y-%m-%d_%H-%M-%S")
+                setting = datetime.now().strftime("%y-%m-%d_%H-%M-%S") + setting
 
             print('>>>>>>>start training : {}>>>>>>>>>>>>>>>>>>>>>>>>>>'.format(setting))
             exp.train(setting)
@@ -230,6 +242,10 @@ if __name__ == '__main__':
             args.embed,
             args.distil,
             args.des, ii)
+        
+        if args.date_record:
+            # setting += datetime.now().strftime("%y-%m-%d_%H-%M-%S")
+            setting = datetime.now().strftime("%y-%m-%d_%H-%M-%S") + setting
 
         print('>>>>>>>testing : {}<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<'.format(setting))
         exp.test(setting, test=1)
