@@ -52,8 +52,25 @@ class Exp_Anomaly_Detection_LTM(Exp_Basic):
         with torch.no_grad():
             for i, (batch_x, _) in enumerate(vali_loader):
                 batch_x = batch_x.float().to(self.device)
-
-                outputs = self.model(batch_x, None, None, None)
+                if self.args.ad_mask_type == 'random':
+                    # random mask
+                    B, T, N = batch_x.shape
+                    """
+					B = batch size
+					T = seq len
+					N = number of features
+					"""
+                    assert T % self.args.patch_len == 0
+                    mask = torch.rand((B, T // self.args.patch_len, N)).to(self.device)
+                    mask = mask.unsqueeze(2).repeat(1, 1, self.args.patch_len, 1)
+                    mask[mask <= self.args.mask_rate] = 0  # masked
+                    mask[mask > self.args.mask_rate] = 1  # remained
+                    mask = mask.view(mask.size(0), -1, mask.size(-1))
+                    mask[:, :self.args.patch_len, :] = 1  # first patch is always observed
+                    inp = batch_x.masked_fill(mask == 0, 0)
+                    outputs = self.model(inp, None, None, None)
+                else:
+                    outputs = self.model(batch_x, None, None, None)
 
                 f_dim = -1 if self.args.features == 'MS' else 0
                 outputs = outputs[:, :, f_dim:]
@@ -94,8 +111,26 @@ class Exp_Anomaly_Detection_LTM(Exp_Basic):
                 model_optim.zero_grad()
 
                 batch_x = batch_x.float().to(self.device)
-
-                outputs = self.model(batch_x, None, None, None)
+                
+                if self.args.ad_mask_type == 'random':
+                    # random mask
+                    B, T, N = batch_x.shape
+                    """
+					B = batch size
+					T = seq len
+					N = number of features
+					"""
+                    assert T % self.args.patch_len == 0
+                    mask = torch.rand((B, T // self.args.patch_len, N)).to(self.device)
+                    mask = mask.unsqueeze(2).repeat(1, 1, self.args.patch_len, 1)
+                    mask[mask <= self.args.mask_rate] = 0  # masked
+                    mask[mask > self.args.mask_rate] = 1  # remained
+                    mask = mask.view(mask.size(0), -1, mask.size(-1))
+                    mask[:, :self.args.patch_len, :] = 1  # first patch is always observed
+                    inp = batch_x.masked_fill(mask == 0, 0)
+                    outputs = self.model(inp, None, None, None)
+                else:
+                    outputs = self.model(batch_x, None, None, None)
 
                 f_dim = -1 if self.args.features == 'MS' else 0
                 outputs = outputs[:, :, f_dim:]
@@ -156,7 +191,25 @@ class Exp_Anomaly_Detection_LTM(Exp_Basic):
             for i, (batch_x, batch_y) in enumerate(test_loader):
                 batch_x = batch_x.float().to(self.device)
                 # reconstruct the input sequence and record the loss as a sorted list
-                outputs = self.model(batch_x, None, None, None)
+                if self.args.ad_mask_type == 'random':
+                    # random mask
+                    B, T, N = batch_x.shape
+                    """
+					B = batch size
+					T = seq len
+					N = number of features
+					"""
+                    assert T % self.args.patch_len == 0
+                    mask = torch.rand((B, T // self.args.patch_len, N)).to(self.device)
+                    mask = mask.unsqueeze(2).repeat(1, 1, self.args.patch_len, 1)
+                    mask[mask <= self.args.mask_rate] = 0  # masked
+                    mask[mask > self.args.mask_rate] = 1  # remained
+                    mask = mask.view(mask.size(0), -1, mask.size(-1))
+                    mask[:, :self.args.patch_len, :] = 1  # first patch is always observed
+                    inp = batch_x.masked_fill(mask == 0, 0)
+                    outputs = self.model(inp, None, None, None)
+                else:
+                    outputs = self.model(batch_x, None, None, None)
                 # embeds = self.model.getEmbedding(batch_x)
                 # features = self.model.getFeature(batch_x)
                 

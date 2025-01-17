@@ -53,6 +53,7 @@ if __name__ == '__main__':
 
     # anomaly detection task
     parser.add_argument('--anomaly_ratio', type=float, default=0.25, help='prior anomaly ratio (%)')
+    parser.add_argument('--ad_mask_type', type=str, default=None, help='The masking type for TimeBert')
 
     # model define
     parser.add_argument('--expand', type=int, default=2, help='expansion factor for Mamba')
@@ -88,6 +89,11 @@ if __name__ == '__main__':
     parser.add_argument('--seg_len', type=int, default=48,
                         help='the length of segmen-wise iteration of SegRNN')
     parser.add_argument('--ckpt_path', type=str, default='', help='ckpt file')
+    parser.add_argument('--feature_size', type=int, default=7, help='The feature size of ARMD model')
+    parser.add_argument('--timesteps', type=int, default=96, help='The timesteps of ARMD model')
+    parser.add_argument('--sampling_timesteps', type=int, default=2, help='The sampling timesteps of ARMD model')
+    parser.add_argument('--loss_type', type=str, default='l1', help='The loss type of the ARMD model')
+    parser.add_argument('--beta_schedule', type=str, default='cosine', help='The beta schedule of ARMD model')
 
     # optimization
     parser.add_argument('--num_workers', type=int, default=10, help='data loader num workers')
