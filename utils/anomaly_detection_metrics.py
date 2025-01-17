@@ -80,8 +80,6 @@ def adjbestf1(y_true: np.array, y_scores: np.array, n_splits: int = 50):
         score_real = f1_score(y_pred, y_true)
         # score_real = precision_recall_fscore_support(y_true, y_pred, average='binary')[2]
         f1.append([score_real, threshold])
-        # import pdb
-        # pdb.set_trace()
         # 将预测结果进行adjust操作
         y_pred_ajust = adjust_predicts(
             score=y_scores,

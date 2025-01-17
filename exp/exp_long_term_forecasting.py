@@ -215,7 +215,7 @@ class Exp_Long_Term_Forecast(Exp_Basic):
 
                 outputs = outputs[:, :, f_dim:]
                 batch_y = batch_y[:, :, f_dim:]
-
+                
                 pred = outputs
                 true = batch_y
 

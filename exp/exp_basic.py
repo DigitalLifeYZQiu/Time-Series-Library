@@ -3,7 +3,8 @@ import torch
 from models import Autoformer, Transformer, TimesNet, Nonstationary_Transformer, DLinear, FEDformer, \
     Informer, LightTS, Reformer, ETSformer, Pyraformer, PatchTST, MICN, Crossformer, FiLM, iTransformer, \
     Koopa, TiDE, FreTS, TimeMixer, TSMixer, SegRNN, MambaSimple, TemporalFusionTransformer, SCINet, PAttn, TimeXer, \
-    TimeBert, ARIMA, LinearRegression, ExponentialSmoothing, Theta, KalmanFilter, RandomForest, XGBoost, LightGBM
+    TimeBert, ARIMA, AutoARIMA, DeepARIMA, LinearRegression, ExponentialSmoothing, Theta, KalmanFilter, RandomForest, \
+    XGBoost, LightGBM, ARIMA_tta, AutoARIMA_tta, DeepARIMA_tta, ARIMA_plus, ARIMA_plus_tta
 
 
 class Exp_Basic(object):
@@ -41,6 +42,8 @@ class Exp_Basic(object):
         }
         self.statistical_model_dict = {
             'ARIMA': ARIMA,
+            'AutoARIMA': AutoARIMA,
+            'DeepARIMA': DeepARIMA,
             'LinearRegression': LinearRegression,
             'ExponentialSmoothing': ExponentialSmoothing,
             'Theta': Theta,
@@ -48,6 +51,11 @@ class Exp_Basic(object):
             'RandomForest': RandomForest,
             'XGBoost': XGBoost,
             'LightGBM': LightGBM,
+            'ARIMA_tta': ARIMA_tta,
+            'AutoARIMA_tta': AutoARIMA_tta,
+            'DeepARIMA_tta': DeepARIMA_tta,
+            'ARIMA_plus': ARIMA_plus,
+            'ARIMA_plus_tta': ARIMA_plus_tta,
         }
         if args.model == 'Mamba':
             print('Please make sure you have successfully installed mamba_ssm')

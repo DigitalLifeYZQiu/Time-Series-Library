@@ -12,6 +12,7 @@ from data_provider.uea import subsample, interpolate_missing, Normalizer
 from sktime.datasets import load_from_tsfile_to_dataframe
 import warnings
 from utils.augmentation import run_augmentation_single
+from Analysis.DataframeAnalysis import DataframeAnalysis
 
 warnings.filterwarnings('ignore')
 
@@ -48,19 +49,35 @@ class Dataset_ETT_hour(Dataset):
 
     def __read_data__(self):
         self.scaler = StandardScaler()
-        df_raw = pd.read_csv(os.path.join(self.root_path,
-                                          self.data_path))
+        df_raw = pd.read_csv(os.path.join(self.root_path,self.data_path))
 
         border1s = [0, 12 * 30 * 24 - self.seq_len, 12 * 30 * 24 + 4 * 30 * 24 - self.seq_len]
         border2s = [12 * 30 * 24, 12 * 30 * 24 + 4 * 30 * 24, 12 * 30 * 24 + 8 * 30 * 24]
         border1 = border1s[self.set_type]
         border2 = border2s[self.set_type]
+        
+        if self.args.clean and self.set_type==0:
+            print(f"Cleaning data in training set: self.set_type = {self.set_type}")
+            DA = DataframeAnalysis( dataFrame=df_raw[border1s[0]:border2s[0]])
+            if DA.checkDateContinuity(DA.df_raw.columns[0])[1]:
+                print("Found Date Incontinuity, Be Aware")
+            if DA.getNanIndex(start_col=DA.df_raw.columns[1], end_col=DA.df_raw.columns[-1])[1]:
+                print("Found Missing Value, Interpolating")
+                DA.getInterpolate(method='linear', start_col=DA.df_raw.columns[1], end_col=DA.df_raw.columns[-1])
+            if DA.checkOutlierIQR(start_col=DA.df_raw.columns[1], end_col=DA.df_raw.columns[-1])[1]:
+                print("Found IQR Outlier, Replacing")
+                DA.getOutlierIQR(start_col=DA.df_raw.columns[1], end_col=DA.df_raw.columns[-1])
+                # DA.getOutlierIQR(start_col=DA.df_raw.columns[-1], end_col=DA.df_raw.columns[-1])
+            # DA.getMovingAverage(start_col=DA.df_raw.columns[1], end_col=DA.df_raw.columns[-1]) # smoothing
+            df_raw[border1s[0]:border2s[0]] = DA.df_raw.values
 
         if self.features == 'M' or self.features == 'MS':
             cols_data = df_raw.columns[1:]
             df_data = df_raw[cols_data]
         elif self.features == 'S':
             df_data = df_raw[[self.target]]
+        else:
+            df_data = df_raw
 
         if self.scale:
             train_data = df_data[border1s[0]:border2s[0]]
@@ -148,6 +165,21 @@ class Dataset_ETT_minute(Dataset):
         border2s = [12 * 30 * 24 * 4, 12 * 30 * 24 * 4 + 4 * 30 * 24 * 4, 12 * 30 * 24 * 4 + 8 * 30 * 24 * 4]
         border1 = border1s[self.set_type]
         border2 = border2s[self.set_type]
+        
+        if self.args.clean and self.set_type==0:
+            print(f"Cleaning data in training set: self.set_type = {self.set_type}")
+            DA = DataframeAnalysis( dataFrame=df_raw[border1s[0]:border2s[0]])
+            if DA.checkDateContinuity(DA.df_raw.columns[0])[1]:
+                print("Found Date Incontinuity, Be Aware")
+            if DA.getNanIndex(start_col=DA.df_raw.columns[1], end_col=DA.df_raw.columns[-1])[1]:
+                print("Found Missing Value, Interpolating")
+                DA.getInterpolate(method='linear', start_col=DA.df_raw.columns[1], end_col=DA.df_raw.columns[-1])
+            if DA.checkOutlierIQR(start_col=DA.df_raw.columns[1], end_col=DA.df_raw.columns[-1])[1]:
+                print("Found IQR Outlier, Replacing")
+                DA.getOutlierIQR(start_col=DA.df_raw.columns[1], end_col=DA.df_raw.columns[-1])
+                # DA.getOutlierIQR(start_col=DA.df_raw.columns[-1], end_col=DA.df_raw.columns[-1])
+            # DA.getMovingAverage(start_col=DA.df_raw.columns[1], end_col=DA.df_raw.columns[-1]) # smoothing
+            df_raw[border1s[0]:border2s[0]] = DA.df_raw.values
 
         if self.features == 'M' or self.features == 'MS':
             cols_data = df_raw.columns[1:]
@@ -253,6 +285,21 @@ class Dataset_Custom(Dataset):
         border2s = [num_train, num_train + num_vali, len(df_raw)]
         border1 = border1s[self.set_type]
         border2 = border2s[self.set_type]
+        
+        if self.args.clean and self.set_type==0:
+            print(f"Cleaning data in training set: self.set_type = {self.set_type}")
+            DA = DataframeAnalysis( dataFrame=df_raw[border1s[0]:border2s[0]])
+            if DA.checkDateContinuity(DA.df_raw.columns[0])[1]:
+                print("Found Date Incontinuity, Be Aware")
+            if DA.getNanIndex(start_col=DA.df_raw.columns[1], end_col=DA.df_raw.columns[-1])[1]:
+                print("Found Missing Value, Interpolating")
+                DA.getInterpolate(method='linear', start_col=DA.df_raw.columns[1], end_col=DA.df_raw.columns[-1])
+            if DA.checkOutlierIQR(start_col=DA.df_raw.columns[1], end_col=DA.df_raw.columns[-1])[1]:
+                print("Found IQR Outlier, Replacing")
+                DA.getOutlierIQR(start_col=DA.df_raw.columns[1], end_col=DA.df_raw.columns[-1])
+                # DA.getOutlierIQR(start_col=DA.df_raw.columns[-1], end_col=DA.df_raw.columns[-1])
+            # DA.getMovingAverage(start_col=DA.df_raw.columns[1], end_col=DA.df_raw.columns[-1]) # smoothing
+            df_raw[border1s[0]:border2s[0]] = DA.df_raw.values
 
         if self.features == 'M' or self.features == 'MS':
             cols_data = df_raw.columns[1:]
@@ -414,17 +461,21 @@ class PSMSegLoader(Dataset):
         elif (self.flag == 'val'):
             return (self.val.shape[0] - self.win_size) // self.step + 1
         elif (self.flag == 'test'):
-            return (self.test.shape[0] - self.win_size) // self.step + 1
+            # return (self.test.shape[0] - self.win_size) // self.step + 1
+            return (self.test.shape[0] - self.win_size) // self.win_size + 1
         else:
             return (self.test.shape[0] - self.win_size) // self.win_size + 1
 
     def __getitem__(self, index):
-        index = index * self.step
+        # index = index * self.step
         if self.flag == "train":
+            index = index * self.step
             return np.float32(self.train[index:index + self.win_size]), np.float32(self.test_labels[0:self.win_size])
         elif (self.flag == 'val'):
+            index = index * self.step
             return np.float32(self.val[index:index + self.win_size]), np.float32(self.test_labels[0:self.win_size])
         elif (self.flag == 'test'):
+            index = index * self.win_size
             return np.float32(self.test[index:index + self.win_size]), np.float32(
                 self.test_labels[index:index + self.win_size])
         else:
@@ -457,17 +508,21 @@ class MSLSegLoader(Dataset):
         elif (self.flag == 'val'):
             return (self.val.shape[0] - self.win_size) // self.step + 1
         elif (self.flag == 'test'):
-            return (self.test.shape[0] - self.win_size) // self.step + 1
+            # return (self.test.shape[0] - self.win_size) // self.step + 1
+            return (self.test.shape[0] - self.win_size) // self.win_size + 1
         else:
             return (self.test.shape[0] - self.win_size) // self.win_size + 1
 
     def __getitem__(self, index):
-        index = index * self.step
+        # index = index * self.step
         if self.flag == "train":
+            index = index * self.step
             return np.float32(self.train[index:index + self.win_size]), np.float32(self.test_labels[0:self.win_size])
         elif (self.flag == 'val'):
+            index = index * self.step
             return np.float32(self.val[index:index + self.win_size]), np.float32(self.test_labels[0:self.win_size])
         elif (self.flag == 'test'):
+            index = index * self.win_size
             return np.float32(self.test[index:index + self.win_size]), np.float32(
                 self.test_labels[index:index + self.win_size])
         else:
@@ -495,23 +550,26 @@ class SMAPSegLoader(Dataset):
         print("train:", self.train.shape)
 
     def __len__(self):
-
         if self.flag == "train":
             return (self.train.shape[0] - self.win_size) // self.step + 1
         elif (self.flag == 'val'):
             return (self.val.shape[0] - self.win_size) // self.step + 1
         elif (self.flag == 'test'):
-            return (self.test.shape[0] - self.win_size) // self.step + 1
+            # return (self.test.shape[0] - self.win_size) // self.step + 1
+            return (self.test.shape[0] - self.win_size) // self.win_size + 1
         else:
             return (self.test.shape[0] - self.win_size) // self.win_size + 1
 
     def __getitem__(self, index):
-        index = index * self.step
+        # index = index * self.step
         if self.flag == "train":
+            index = index * self.step
             return np.float32(self.train[index:index + self.win_size]), np.float32(self.test_labels[0:self.win_size])
         elif (self.flag == 'val'):
+            index = index * self.step
             return np.float32(self.val[index:index + self.win_size]), np.float32(self.test_labels[0:self.win_size])
         elif (self.flag == 'test'):
+            index = index * self.win_size
             return np.float32(self.test[index:index + self.win_size]), np.float32(
                 self.test_labels[index:index + self.win_size])
         else:
@@ -521,7 +579,7 @@ class SMAPSegLoader(Dataset):
 
 
 class SMDSegLoader(Dataset):
-    def __init__(self, args, root_path, win_size, step=100, flag="train"):
+    def __init__(self, args, root_path, win_size, step=1, flag="train"):
         self.flag = flag
         self.step = step
         self.win_size = win_size
@@ -542,17 +600,21 @@ class SMDSegLoader(Dataset):
         elif (self.flag == 'val'):
             return (self.val.shape[0] - self.win_size) // self.step + 1
         elif (self.flag == 'test'):
-            return (self.test.shape[0] - self.win_size) // self.step + 1
+            # return (self.test.shape[0] - self.win_size) // self.step + 1
+            return (self.test.shape[0] - self.win_size) // self.win_size + 1
         else:
             return (self.test.shape[0] - self.win_size) // self.win_size + 1
 
     def __getitem__(self, index):
-        index = index * self.step
+        # index = index * self.step
         if self.flag == "train":
+            index = index * self.step
             return np.float32(self.train[index:index + self.win_size]), np.float32(self.test_labels[0:self.win_size])
         elif (self.flag == 'val'):
+            index = index * self.step
             return np.float32(self.val[index:index + self.win_size]), np.float32(self.test_labels[0:self.win_size])
         elif (self.flag == 'test'):
+            index = index * self.win_size
             return np.float32(self.test[index:index + self.win_size]), np.float32(
                 self.test_labels[index:index + self.win_size])
         else:
@@ -594,17 +656,21 @@ class SWATSegLoader(Dataset):
         elif (self.flag == 'val'):
             return (self.val.shape[0] - self.win_size) // self.step + 1
         elif (self.flag == 'test'):
-            return (self.test.shape[0] - self.win_size) // self.step + 1
+            # return (self.test.shape[0] - self.win_size) // self.step + 1
+            return (self.test.shape[0] - self.win_size) // self.win_size + 1
         else:
             return (self.test.shape[0] - self.win_size) // self.win_size + 1
 
     def __getitem__(self, index):
-        index = index * self.step
+        # index = index * self.step
         if self.flag == "train":
+            index = index * self.step
             return np.float32(self.train[index:index + self.win_size]), np.float32(self.test_labels[0:self.win_size])
         elif (self.flag == 'val'):
+            index = index * self.step
             return np.float32(self.val[index:index + self.win_size]), np.float32(self.test_labels[0:self.win_size])
         elif (self.flag == 'test'):
+            index = index * self.win_size
             return np.float32(self.test[index:index + self.win_size]), np.float32(
                 self.test_labels[index:index + self.win_size])
         else:

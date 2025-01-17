@@ -171,10 +171,11 @@ class Exp_Anomaly_Detection_LTM(Exp_Basic):
                 
         
         # * Evaluate metrics
-        test_labels = np.concatenate(test_labels, axis=0).flatten()
-        input = np.concatenate(input_list, axis=0).reshape(-1)
-        output = np.concatenate(output_list, axis=0).reshape(-1)
-        score_list = np.concatenate(score_list, axis=0).reshape(-1)
+        B,S,C = input_list[0].shape
+        test_labels = np.concatenate(test_labels, axis=0).reshape((-1))
+        input = np.concatenate(input_list, axis=0).reshape((-1, C))
+        output = np.concatenate(output_list, axis=0).reshape((-1, C))
+        score_list = np.concatenate(score_list, axis=0).reshape((-1))
         
         # 输出adjustment best f1及best f1在最佳阈值下的原始结果
         best_pred_adj, best_pred = adjbestf1(test_labels, score_list, 100)

@@ -131,7 +131,7 @@ def visual_anomaly_segment(true, preds=None, best_pred=None, label=None, name='.
     print(f'Plot saved to {name}')
 
 
-def visual_anomaly_segment_MS(true, preds=None, best_pred=None, label=None, name='./pic/test.pdf'):
+def visual_anomaly_segment_MS(true, preds=None, best_pred=None, label=None, name='./pic/test.pdf', count=1):
     """
     Results visualization
     """
@@ -146,7 +146,7 @@ def visual_anomaly_segment_MS(true, preds=None, best_pred=None, label=None, name
     fig, axes = plt.subplots(C, 1, figsize=(8, 2 * C), sharex=True)  # create subplots
     if C == 1:
         axes = [axes]  # If there's only one variate, ensure axes is iterable
-    
+    counter = 0
     if segments is not None:
         for border1, border2 in segments:
             name_split = name.split('.')
@@ -167,11 +167,14 @@ def visual_anomaly_segment_MS(true, preds=None, best_pred=None, label=None, name
                 if best_pred is not None:
                     selected = np.where(best_pred[left:right])[0]
                     for select in selected:
-                        axes[i].axvline(x=select, color='purple', alpha=0.1, linewidth=0.1)
+                        axes[i].axvline(x=select, color='purple', alpha=0.1, linewidth=0.5)
                 
                 # plt.legend(loc='upper left')
             plt.savefig(seg_name, bbox_inches='tight')
             print(f'Plot saved to {seg_name}')
+            counter += 1
+            if counter>count:
+                return
 
 
 def visual_anomaly_segment_Multi(true, preds=None, best_pred=None, label=None, name='./pic/test.pdf'):
