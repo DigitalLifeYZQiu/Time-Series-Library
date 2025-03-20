@@ -127,15 +127,20 @@ class Exp_Classification(Exp_Basic):
             print("Epoch: {} cost time: {}".format(epoch + 1, time.time() - epoch_time))
             train_loss = np.average(train_loss)
             vali_loss, val_accuracy = self.vali(vali_data, vali_loader, criterion)
-            test_loss, test_accuracy = self.vali(test_data, test_loader, criterion)
+            # test_loss, test_accuracy = self.vali(test_data, test_loader, criterion)
 
+            # print(
+            #     "Epoch: {0}, Steps: {1} | Train Loss: {2:.3f} Vali Loss: {3:.3f} Vali Acc: {4:.3f} Test Loss: {5:.3f} Test Acc: {6:.3f}"
+            #     .format(epoch + 1, train_steps, train_loss, vali_loss, val_accuracy, test_loss, test_accuracy))
             print(
-                "Epoch: {0}, Steps: {1} | Train Loss: {2:.3f} Vali Loss: {3:.3f} Vali Acc: {4:.3f} Test Loss: {5:.3f} Test Acc: {6:.3f}"
-                .format(epoch + 1, train_steps, train_loss, vali_loss, val_accuracy, test_loss, test_accuracy))
+                "Epoch: {0}, Steps: {1} | Train Loss: {2:.3f} Vali Loss: {3:.3f} Vali Acc: {4:.3f}"
+                .format(epoch + 1, train_steps, train_loss, vali_loss, val_accuracy))
             early_stopping(-val_accuracy, self.model, path)
             if early_stopping.early_stop:
                 print("Early stopping")
                 break
+            
+            adjust_learning_rate(model_optim, epoch + 1, self.args)
 
         best_model_path = path + '/' + 'checkpoint.pth'
         self.model.load_state_dict(torch.load(best_model_path))

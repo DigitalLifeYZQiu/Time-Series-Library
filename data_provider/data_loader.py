@@ -387,7 +387,7 @@ class Dataset_M4(Dataset):
 
 
 class PSMSegLoader(Dataset):
-    def __init__(self, args, root_path, win_size, step=1, flag="train"):
+    def __init__(self, args, root_path, win_size, step=100, flag="train"):
         self.flag = flag
         self.step = step
         self.win_size = win_size
@@ -412,29 +412,35 @@ class PSMSegLoader(Dataset):
         if self.flag == "train":
             return (self.train.shape[0] - self.win_size) // self.step + 1
         elif (self.flag == 'val'):
-            return (self.val.shape[0] - self.win_size) // self.step + 1
+            # return (self.val.shape[0] - self.win_size) // self.step + 1
+            return (self.val.shape[0] - self.win_size) // self.win_size + 1
         elif (self.flag == 'test'):
-            return (self.test.shape[0] - self.win_size) // self.step + 1
+            # return (self.test.shape[0] - self.win_size) // self.step + 1
+            return (self.test.shape[0] - self.win_size) // self.win_size + 1
         else:
             return (self.test.shape[0] - self.win_size) // self.win_size + 1
 
     def __getitem__(self, index):
-        index = index * self.step
+        # index = index * self.step
         if self.flag == "train":
+            index = index * self.step
             return np.float32(self.train[index:index + self.win_size]), np.float32(self.test_labels[0:self.win_size])
         elif (self.flag == 'val'):
+            index = index * self.win_size
             return np.float32(self.val[index:index + self.win_size]), np.float32(self.test_labels[0:self.win_size])
         elif (self.flag == 'test'):
+            index = index * self.win_size
             return np.float32(self.test[index:index + self.win_size]), np.float32(
                 self.test_labels[index:index + self.win_size])
         else:
+            index = index * self.step
             return np.float32(self.test[
                               index // self.step * self.win_size:index // self.step * self.win_size + self.win_size]), np.float32(
                 self.test_labels[index // self.step * self.win_size:index // self.step * self.win_size + self.win_size])
 
 
 class MSLSegLoader(Dataset):
-    def __init__(self, args, root_path, win_size, step=1, flag="train"):
+    def __init__(self, args, root_path, win_size, step=100, flag="train"):
         self.flag = flag
         self.step = step
         self.win_size = win_size
@@ -455,22 +461,28 @@ class MSLSegLoader(Dataset):
         if self.flag == "train":
             return (self.train.shape[0] - self.win_size) // self.step + 1
         elif (self.flag == 'val'):
-            return (self.val.shape[0] - self.win_size) // self.step + 1
+            # return (self.val.shape[0] - self.win_size) // self.step + 1
+            return (self.val.shape[0] - self.win_size) // self.win_size + 1
         elif (self.flag == 'test'):
-            return (self.test.shape[0] - self.win_size) // self.step + 1
+            # return (self.test.shape[0] - self.win_size) // self.step + 1
+            return (self.test.shape[0] - self.win_size) // self.win_size + 1
         else:
             return (self.test.shape[0] - self.win_size) // self.win_size + 1
 
     def __getitem__(self, index):
-        index = index * self.step
+        # index = index * self.step
         if self.flag == "train":
+            index = index * self.step
             return np.float32(self.train[index:index + self.win_size]), np.float32(self.test_labels[0:self.win_size])
         elif (self.flag == 'val'):
+            index = index * self.win_size
             return np.float32(self.val[index:index + self.win_size]), np.float32(self.test_labels[0:self.win_size])
         elif (self.flag == 'test'):
+            index = index * self.win_size
             return np.float32(self.test[index:index + self.win_size]), np.float32(
                 self.test_labels[index:index + self.win_size])
         else:
+            index = index * self.step
             return np.float32(self.test[
                               index // self.step * self.win_size:index // self.step * self.win_size + self.win_size]), np.float32(
                 self.test_labels[index // self.step * self.win_size:index // self.step * self.win_size + self.win_size])
@@ -499,22 +511,28 @@ class SMAPSegLoader(Dataset):
         if self.flag == "train":
             return (self.train.shape[0] - self.win_size) // self.step + 1
         elif (self.flag == 'val'):
-            return (self.val.shape[0] - self.win_size) // self.step + 1
+            # return (self.val.shape[0] - self.win_size) // self.step + 1
+            return (self.val.shape[0] - self.win_size) // self.win_size + 1
         elif (self.flag == 'test'):
-            return (self.test.shape[0] - self.win_size) // self.step + 1
+            # return (self.test.shape[0] - self.win_size) // self.step + 1
+            return (self.test.shape[0] - self.win_size) // self.win_size + 1
         else:
             return (self.test.shape[0] - self.win_size) // self.win_size + 1
 
     def __getitem__(self, index):
-        index = index * self.step
+        # index = index * self.step
         if self.flag == "train":
+            index = index * self.step
             return np.float32(self.train[index:index + self.win_size]), np.float32(self.test_labels[0:self.win_size])
         elif (self.flag == 'val'):
+            index = index * self.win_size
             return np.float32(self.val[index:index + self.win_size]), np.float32(self.test_labels[0:self.win_size])
         elif (self.flag == 'test'):
+            index = index * self.win_size
             return np.float32(self.test[index:index + self.win_size]), np.float32(
                 self.test_labels[index:index + self.win_size])
         else:
+            index = index * self.step
             return np.float32(self.test[
                               index // self.step * self.win_size:index // self.step * self.win_size + self.win_size]), np.float32(
                 self.test_labels[index // self.step * self.win_size:index // self.step * self.win_size + self.win_size])
@@ -540,29 +558,35 @@ class SMDSegLoader(Dataset):
         if self.flag == "train":
             return (self.train.shape[0] - self.win_size) // self.step + 1
         elif (self.flag == 'val'):
-            return (self.val.shape[0] - self.win_size) // self.step + 1
+            # return (self.val.shape[0] - self.win_size) // self.step + 1
+            return (self.val.shape[0] - self.win_size) // self.win_size + 1
         elif (self.flag == 'test'):
-            return (self.test.shape[0] - self.win_size) // self.step + 1
+            # return (self.test.shape[0] - self.win_size) // self.step + 1
+            return (self.test.shape[0] - self.win_size) // self.win_size + 1
         else:
             return (self.test.shape[0] - self.win_size) // self.win_size + 1
 
     def __getitem__(self, index):
-        index = index * self.step
+        # index = index * self.step
         if self.flag == "train":
+            index = index * self.step
             return np.float32(self.train[index:index + self.win_size]), np.float32(self.test_labels[0:self.win_size])
         elif (self.flag == 'val'):
+            index = index * self.win_size
             return np.float32(self.val[index:index + self.win_size]), np.float32(self.test_labels[0:self.win_size])
         elif (self.flag == 'test'):
+            index = index * self.win_size
             return np.float32(self.test[index:index + self.win_size]), np.float32(
                 self.test_labels[index:index + self.win_size])
         else:
+            index = index * self.step
             return np.float32(self.test[
                               index // self.step * self.win_size:index // self.step * self.win_size + self.win_size]), np.float32(
                 self.test_labels[index // self.step * self.win_size:index // self.step * self.win_size + self.win_size])
 
 
 class SWATSegLoader(Dataset):
-    def __init__(self, args, root_path, win_size, step=1, flag="train"):
+    def __init__(self, args, root_path, win_size, step=100, flag="train"):
         self.flag = flag
         self.step = step
         self.win_size = win_size
@@ -592,22 +616,28 @@ class SWATSegLoader(Dataset):
         if self.flag == "train":
             return (self.train.shape[0] - self.win_size) // self.step + 1
         elif (self.flag == 'val'):
-            return (self.val.shape[0] - self.win_size) // self.step + 1
+            # return (self.val.shape[0] - self.win_size) // self.step + 1
+            return (self.val.shape[0] - self.win_size) // self.win_size + 1
         elif (self.flag == 'test'):
-            return (self.test.shape[0] - self.win_size) // self.step + 1
+            # return (self.test.shape[0] - self.win_size) // self.step + 1
+            return (self.test.shape[0] - self.win_size) // self.win_size + 1
         else:
             return (self.test.shape[0] - self.win_size) // self.win_size + 1
 
     def __getitem__(self, index):
-        index = index * self.step
+        # index = index * self.step
         if self.flag == "train":
+            index = index * self.step
             return np.float32(self.train[index:index + self.win_size]), np.float32(self.test_labels[0:self.win_size])
         elif (self.flag == 'val'):
+            index = index * self.win_size
             return np.float32(self.val[index:index + self.win_size]), np.float32(self.test_labels[0:self.win_size])
         elif (self.flag == 'test'):
+            index = index * self.win_size
             return np.float32(self.test[index:index + self.win_size]), np.float32(
                 self.test_labels[index:index + self.win_size])
         else:
+            index = index * self.step
             return np.float32(self.test[
                               index // self.step * self.win_size:index // self.step * self.win_size + self.win_size]), np.float32(
                 self.test_labels[index // self.step * self.win_size:index // self.step * self.win_size + self.win_size])

@@ -10,6 +10,7 @@ from exp.exp_classification import Exp_Classification
 from utils.print_args import print_args
 import random
 import numpy as np
+from datetime import datetime
 
 if __name__ == '__main__':
     fix_seed = 2021
@@ -26,6 +27,7 @@ if __name__ == '__main__':
     parser.add_argument('--model_id', type=str, required=True, default='test', help='model id')
     parser.add_argument('--model', type=str, required=True, default='Autoformer',
                         help='model name, options: [Autoformer, Transformer, TimesNet]')
+    parser.add_argument('--date_record', action='store_true', help='record date in visualization', default=False)
 
     # data loader
     parser.add_argument('--data', type=str, required=True, default='ETTh1', help='dataset type')
@@ -37,6 +39,7 @@ if __name__ == '__main__':
     parser.add_argument('--freq', type=str, default='h',
                         help='freq for time features encoding, options:[s:secondly, t:minutely, h:hourly, d:daily, b:business days, w:weekly, m:monthly], you can also use more detailed freq like 15min or 3h')
     parser.add_argument('--checkpoints', type=str, default='./checkpoints/', help='location of model checkpoints')
+    parser.add_argument('--ckpt_path', type=str, default='', help='ckpt file')
 
     # forecasting task
     parser.add_argument('--seq_len', type=int, default=96, help='input sequence length')
@@ -50,6 +53,8 @@ if __name__ == '__main__':
 
     # anomaly detection task
     parser.add_argument('--anomaly_ratio', type=float, default=0.25, help='prior anomaly ratio (%%)')
+    parser.add_argument('--ad_mask_type', type=str, default=None, help='The masking type for TimesBERT')
+    parser.add_argument('--stride', type=int, default=1, help='stride')
 
     # model define
     parser.add_argument('--expand', type=int, default=2, help='expansion factor for Mamba')
@@ -139,6 +144,23 @@ if __name__ == '__main__':
 
     # TimeXer
     parser.add_argument('--patch_len', type=int, default=16, help='patch length')
+    
+    # TimeBert
+    parser.add_argument('--freeze_patch_encoder', default=False, action="store_true", help='Freeze patch embedding and encoder layers in TimeBert')
+    parser.add_argument('--cls_mask_token_only', action='store_true',
+                        help='use only cls_mask_token in classification task', default=False)
+    parser.add_argument('--var_mask_token_only', action='store_true',
+                        help='use only variate_mask_token in classification task', default=False)
+    parser.add_argument('--subset_rand_ratio', type=float, default=1, help='mask ratio')
+    parser.add_argument('--use_ims', action='store_true', help='Iterated multi-step', default=False)
+    parser.add_argument('--use_finetune', action='store_true', help='Iterated multi-step', default=False)
+    parser.add_argument('--use_channel_independent', action='store_true', help='Use CI', default=False)
+    parser.add_argument('--use_partial_variate', action='store_true', help='Iterated multi-step', default=False)
+    parser.add_argument('--not_use_dataset_token', action='store_true', help='not_use_dataset_token', default=False)
+    parser.add_argument('--not_use_variate_token', action='store_true', help='not_use_variate_token', default=False)
+    parser.add_argument('--use_lm_bert', action='store_true', help='use_lm_bert', default=False)
+    parser.add_argument('--use_vision_bert', action='store_true', help='use_vision_bert', default=False)
+    
 
     args = parser.parse_args()
     if torch.cuda.is_available() and args.use_gpu:
@@ -197,6 +219,10 @@ if __name__ == '__main__':
                 args.embed,
                 args.distil,
                 args.des, ii)
+            
+            if args.date_record:
+                # setting += datetime.now().strftime("%y-%m-%d_%H-%M-%S")
+                setting = datetime.now().strftime("%y-%m-%d_%H-%M-%S") + setting
 
             print('>>>>>>>start training : {}>>>>>>>>>>>>>>>>>>>>>>>>>>'.format(setting))
             exp.train(setting)
@@ -230,6 +256,10 @@ if __name__ == '__main__':
             args.embed,
             args.distil,
             args.des, ii)
+        
+        if args.date_record:
+            # setting += datetime.now().strftime("%y-%m-%d_%H-%M-%S")
+            setting = datetime.now().strftime("%y-%m-%d_%H-%M-%S") + setting
 
         print('>>>>>>>testing : {}<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<'.format(setting))
         exp.test(setting, test=1)
